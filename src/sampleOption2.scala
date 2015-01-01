@@ -1,18 +1,21 @@
 sealed trait MyOption[+A] {
-//  def get: A
-//  def getOrElse[B >: A](elseValue: B): B
-//  def isEmpty: Boolean
+  def get: A
+  def getOrElse[B >: A](elseValue: B): B
+  def isEmpty: Boolean
+//  def map[B](f: A => MyOption[B]): MyOption[B]
+//  def flatMap[B](f: A => MyOption[B]): MyOption[B]
 }
 
-object MyOption {
-  def apply[A](x: A): MyOption[A] = MyOption[A](x)
-}
-
-case class MySome[+A](x: A) extends MyOption[A]
-object MySome {
+case class MySome[+A](x: A) extends MyOption[A] {
+  def get: A = this.x
+  def getOrElse[B >: A](elseValue: B): B = this.x
+  def isEmpty: Boolean = false
 }
 
 case object MyNone extends MyOption[Nothing] {
+  def get: Nothing = throw new NullPointerException()
+  def getOrElse[B](elseValue: B): B = elseValue
+  def isEmpty: Boolean = true
 }
 
 object sampleOption2 extends App {
@@ -37,22 +40,22 @@ object sampleOption2 extends App {
 //    } yield b + 1
 //    assert(result.get == myResult.get)
 //  }
-//  def matchTest(): Unit = {
-//    val f = (n: MyOption[Int]) => n match {
-//      case MySome(v) => v
-//      case MyNone => -1
-//    }
-//    val g = (n: Option[Int]) => n match {
-//      case Some(v) => v
-//      case None => -1
-//    }
-//
-//    assert(f(MyNone) == g(None))
-//    assert(f(MySome(100)) == g(Some(100)))
-//  }
+  def matchTest(): Unit = {
+    val f = (n: MyOption[Int]) => n match {
+      case MySome(v) => v
+      case MyNone => -1
+    }
+    val g = (n: Option[Int]) => n match {
+      case Some(v) => v
+      case None => -1
+    }
+
+    assert(f(MyNone) == g(None))
+    assert(f(MySome(100)) == g(Some(100)))
+  }
 //  mapTest()
 //  flatMapTest()
 //  forTest()
-//  matchTest()
+  matchTest()
 }
 
