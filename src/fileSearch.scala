@@ -6,8 +6,9 @@ import scala.io.Source
 object fileSearch extends App {
 
 
-  println(find("html", new File("/Users/cw_tsuru/Source/document/")))
-  println(search("lint", new File("/Users/cw_tsuru/Source/document/")))
+  println(find("normal", new File("/Users/cw_tsuru/stocklicense")))
+  println(search("cmttkwkw", new File("/Users/cw_tsuru/stocklicense")))
+  // println(search("JCDV", new File("/Users/cw_tsuru/stocklicense")))
 
   def find(keyword: String, root: java.io.File): Seq[java.io.File] = {
     @tailrec
@@ -34,11 +35,34 @@ object fileSearch extends App {
   }
 
   def search(keyword: String, root: java.io.File): Seq[java.io.File] = {
-    // root.listFiles().foreach {
-    //   file => Source.fromFile(file.getName)
-    // }
-    // root.listFiles().filter {}
+    @tailrec
+    def getFiles(root_files: Seq[java.io.File], files: Seq[java.io.File], directories: Seq[java.io.File]): Seq[java.io.File] = {
+      val current_files = root_files.filter {
+        _.isFile
+      }.toSeq
 
-    Seq(root)
+      val current_directories = root_files.filter {
+        _.isDirectory
+      }.toSeq
+
+      val all_files = current_files ++ files
+      val all_directories =  current_directories ++ directories
+
+      if (all_directories.isEmpty) return all_files
+
+      getFiles(all_directories.head.listFiles(), all_files, all_directories.tail)
+    }
+
+    val files: Seq[File] = getFiles(root.listFiles(), Seq(), Seq())
+    files.filter {
+      f =>
+        Source.fromFile(f).getLines().exists(_.contains(keyword))
+    }
+    // Seq().ex
+    // (for (f <- getFiles(root.listFiles(), Seq(), Seq())) yield {
+    //   Source.fromFile(f).getLines().toSeq.map {
+    //     case l if l.contains(keyword) => f
+    //   }
+    // }.distinct).flatten
   }
 }
